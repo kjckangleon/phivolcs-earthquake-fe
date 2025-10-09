@@ -126,17 +126,7 @@ export default function PhivolcsDataFetcher() {
 
 
 
-          <EarthquakeMap
-            earthquakes={earthquakes}
-            title="Earthquake Activity Map"
-            subtitle="October 2025 - Philippines Region"
-            isExpanded={expandedSection === 'earthquakes'}
-            onToggle={() => setExpandedSection(
-              expandedSection === 'earthquakes' ? null : 'earthquakes'
-            )}
-            headerClassName="bg-blue-50" // optional
-            contentClassName="bg-gray-50" // optional
-          />
+
 
         </div>
 
@@ -216,96 +206,17 @@ export default function PhivolcsDataFetcher() {
         )}
 
         {filteredEarthquakes.length > 0 && (
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gradient-to-r from-slate-800 to-slate-700 text-white">
-                  <tr>
-                    <th className="px-4 py-4 text-left font-semibold">Date & Time</th>
-                    <th className="px-4 py-4 text-left font-semibold hidden md:table-cell">Latitude</th>
-                    <th className="px-4 py-4 text-left font-semibold hidden md:table-cell">Longitude</th>
-                    <th className="px-4 py-4 text-left font-semibold hidden md:table-cell">Depth</th>
-                    <th className="px-4 py-4 text-left font-semibold">Magnitude</th>
-                    <th className="px-4 py-4 text-left font-semibold">Location</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredEarthquakes.map((quake, index) => (
-                    <React.Fragment key={index}>
-                      <tr
-                        className="border-b hover:bg-blue-50 transition-colors cursor-pointer"
-                        onClick={() => setExpandedRow(expandedRow === index ? null : index)}
-                        aria-expanded={expandedRow === index}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            setExpandedRow(expandedRow === index ? null : index)
-                          }
-                        }}
-                      >
-                        <td className="px-4 py-4 text-sm text-slate-700 font-medium">
-                          <div className="flex items-center gap-2">
-                            <ChevronDown
-                              size={16}
-                              className={`transition-transform ${expandedRow === index ? 'rotate-180' : ''} text-slate-500`}
-                              aria-hidden
-                            />
-                            {quake.dateTime}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-sm text-slate-600 hidden md:table-cell">{quake.latitude}</td>
-                        <td className="px-4 py-4 text-sm text-slate-600 hidden md:table-cell">{quake.longitude}</td>
-                        <td className="px-4 py-4 text-sm text-slate-600 hidden md:table-cell">{quake.depth} km</td>
-                        <td className="px-2 py-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getMagnitudeBadge(quake.magnitude)}`}>{quake.magnitude}</span>
-                        </td>
-                        <td className="px-4 py-4 text-sm text-slate-700 break-anywhere">
-                          <div className="flex items-start gap-2">
-                            <MapPin size={16} className="flex-shrink-0 mt-1 text-blue-500" />
-                            <span>{quake.location}</span>
-                          </div>
-                        </td>
-                      </tr>
-                      {expandedRow === index && (
-                        <tr className="bg-blue-50/40">
-                          <td className="px-4 py-4 text-sm text-slate-700" colSpan={6}>
-                            {quake.detailLink ? (
-                              <div className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="truncate">
-                                    <span className="text-slate-600 mr-2">Details:</span>
-                                  </div>
-                                  <a
-                                    href={quake.detailLink}
-                                    target="_blank"
-                                    rel="noreferrer noopener"
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700"
-                                  >
-                                    Open in new tab
-                                  </a>
-                                </div>
-                                <div className="border rounded-lg overflow-hidden bg-white responsive-iframe-container">
-                                  <iframe
-                                    src={quake.detailLink}
-                                    title={`detail-${index}`}
-                                    loading="lazy"
-                                  />
-                                </div>
-                                <p className="text-xs text-slate-500">If the preview is blocked by the source site, use the button to open the page.</p>
-                              </div>
-                            ) : (
-                              <span className="text-slate-500">No detail link available for this event.</span>
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <EarthquakeMap
+            earthquakes={filteredEarthquakes}
+            title="Earthquake Activity Map"
+            subtitle="October 2025 - Philippines Region"
+            isExpanded={true}
+            onToggle={() => setExpandedSection(
+              expandedSection === 'filteredEarthquakes' ? null : 'filteredEarthquakes'
+            )}
+            headerClassName="bg-blue-50" // optional
+            contentClassName="bg-gray-50" // optional
+          />
         )}
 
         {!loading && !error && earthquakes.length === 0 && (
