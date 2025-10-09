@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { RefreshCw, AlertCircle, Clock, MapPin, Activity, Server, Wifi, WifiOff, ChevronDown } from 'lucide-react'
+import EarthquakeMap from './EarthquakeMap'
 
 export default function PhivolcsDataFetcher() {
   const [earthquakes, setEarthquakes] = useState([])
@@ -11,6 +12,7 @@ export default function PhivolcsDataFetcher() {
   const [filterMagnitude, setFilterMagnitude] = useState(0)
   const [searchLocation, setSearchLocation] = useState('')
   const [expandedRow, setExpandedRow] = useState(null)
+  const [expandedSection, setExpandedSection] = useState(null);
 
   const fetchData = async (forceRefresh = false) => {
     setLoading(true)
@@ -121,6 +123,21 @@ export default function PhivolcsDataFetcher() {
               )}
             </div>
           )}
+
+
+
+          <EarthquakeMap
+            earthquakes={earthquakes}
+            title="Earthquake Activity Map"
+            subtitle="October 2025 - Philippines Region"
+            isExpanded={expandedSection === 'earthquakes'}
+            onToggle={() => setExpandedSection(
+              expandedSection === 'earthquakes' ? null : 'earthquakes'
+            )}
+            headerClassName="bg-blue-50" // optional
+            contentClassName="bg-gray-50" // optional
+          />
+
         </div>
 
         {stats && !loading && !error && (
