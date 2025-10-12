@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Info, ExternalLink, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const EarthquakeMap = ({ 
-  earthquakes = [], 
-  title = "Earthquake Activity Map", 
+const EarthquakeMap = ({
+  earthquakes = [],
+  title = "Earthquake Activity Map",
   subtitle = "Recent Seismic Events",
   isExpanded = false,
-  onToggle = () => {},
+  onToggle = () => { },
   headerClassName = "",
   contentClassName = ""
 }) => {
@@ -26,7 +26,7 @@ const EarthquakeMap = ({
       if (window.L && mapRef.current && !mapInstanceRef.current && earthquakes.length > 0) {
         const avgLat = earthquakes.reduce((sum, eq) => sum + parseFloat(eq.latitude), 0) / earthquakes.length;
         const avgLng = earthquakes.reduce((sum, eq) => sum + parseFloat(eq.longitude), 0) / earthquakes.length;
-        
+
         const map = window.L.map(mapRef.current).setView([avgLat, avgLng], 8);
 
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -42,10 +42,10 @@ const EarthquakeMap = ({
           const lng = parseFloat(eq.longitude);
           const depth = parseInt(eq.depth);
           const cleanLocation = eq.location.replace(/\n\s*/g, ' ').trim();
-          
+
           const color = getMagnitudeColor(mag);
           const size = 20 + mag * 5;
-          
+
           const icon = window.L.divIcon({
             className: 'custom-marker',
             html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;">${mag}</div>`,
@@ -112,10 +112,10 @@ const EarthquakeMap = ({
   }, [isSidebarCollapsed, isExpanded]);
 
   const getMagnitudeColor = (mag) => {
-    if (mag >= 3.0) return '#ef4444';
-    if (mag >= 2.0) return '#f97316';
-    if (mag >= 1.5) return '#eab308';
-    return '#22c55e';
+    if (mag >= 6.0) return '#dc2626'; // Strong (≥6)
+    if (mag >= 5.0) return '#f97316'; // Moderate (5-6)
+    if (mag >= 4.0) return '#eab308'; // Light (4-5)
+    return '#22c55e'; // Minor (<4)
   };
 
   const handleEarthquakeClick = (eq, idx) => {
@@ -147,7 +147,7 @@ const EarthquakeMap = ({
   return (
     <div className="w-full border rounded-lg overflow-hidden bg-white shadow-sm">
       {/* Accordion Header */}
-      <div 
+      <div
         onClick={onToggle}
         className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${headerClassName}`}
       >
@@ -179,16 +179,15 @@ const EarthquakeMap = ({
             </button>
 
             {/* Sidebar */}
-            <div 
-              className={`bg-gray-50 border-r overflow-y-auto transition-all duration-300 ${
-                isSidebarCollapsed ? 'w-0 opacity-0' : 'w-80 opacity-100'
-              }`}
+            <div
+              className={`bg-gray-50 border-r overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'w-0 opacity-0' : 'w-80 opacity-100'
+                }`}
             >
               <div className="p-4 bg-gray-100 border-b sticky top-0 z-10">
                 <h3 className="text-lg font-semibold text-gray-800">Recent Earthquakes</h3>
                 <p className="text-sm text-gray-600">{earthquakes.length} events recorded</p>
               </div>
-              
+
               <div className="divide-y">
                 {earthquakes.length === 0 ? (
                   <div className="p-4 text-center text-gray-500">
@@ -200,13 +199,12 @@ const EarthquakeMap = ({
                     const depth = parseInt(eq.depth);
                     const cleanLocation = eq.location.replace(/\n\s*/g, ' ').trim();
                     const isItemExpanded = expandedItems.has(idx);
-                    
+
                     return (
                       <div
                         key={idx}
-                        className={`transition-colors ${
-                          selectedEarthquake === eq ? 'bg-blue-50 border-l-4 border-blue-600' : ''
-                        }`}
+                        className={`transition-colors ${selectedEarthquake === eq ? 'bg-blue-50 border-l-4 border-blue-600' : ''
+                          }`}
                       >
                         <div
                           onClick={() => handleEarthquakeClick(eq, idx)}
@@ -258,9 +256,9 @@ const EarthquakeMap = ({
                                 <span className="text-gray-800 flex-1">{cleanLocation}</span>
                               </div>
                               {eq.detailLink && (
-                                <a 
-                                  href={eq.detailLink} 
-                                  target="_blank" 
+                                <a
+                                  href={eq.detailLink}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 hover:underline mt-2"
                                 >
@@ -281,7 +279,7 @@ const EarthquakeMap = ({
             {/* Map */}
             <div className="flex-1 relative bg-gray-100">
               <div ref={mapRef} className="w-full h-full"></div>
-              
+
               {/* Legend */}
               <div className="absolute bottom-6 right-6 bg-white rounded-lg shadow-lg p-4 z-[1000]">
                 <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
@@ -291,19 +289,19 @@ const EarthquakeMap = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                    <span className="text-gray-700">&lt; 1.5</span>
+                    <span className="text-gray-700">Minor (&lt;4)</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                    <span className="text-gray-700">1.5 - 2.0</span>
+                    <span className="text-gray-700">Light (4-5)</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-4 h-4 rounded-full bg-orange-500"></div>
-                    <span className="text-gray-700">2.0 - 3.0</span>
+                    <span className="text-gray-700">Moderate (5-6)</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                    <span className="text-gray-700">≥ 3.0</span>
+                    <div className="w-4 h-4 rounded-full bg-red-600"></div>
+                    <span className="text-gray-700">Strong (≥6)</span>
                   </div>
                 </div>
               </div>
