@@ -21,9 +21,11 @@ const EarthquakeMap = ({
 
     let leafletScript = null;
     let leafletCss = null;
+    let clusterScript = null;
+    let clusterCss = null;
 
     const initializeMap = () => {
-      if (window.L && mapRef.current && !mapInstanceRef.current && earthquakes.length > 0) {
+      if (window.L && window.L.markerClusterGroup && mapRef.current && !mapInstanceRef.current && earthquakes.length > 0) {
         const avgLat = earthquakes.reduce((sum, eq) => sum + parseFloat(eq.latitude), 0) / earthquakes.length;
         const avgLng = earthquakes.reduce((sum, eq) => sum + parseFloat(eq.longitude), 0) / earthquakes.length;
 
@@ -36,13 +38,12 @@ const EarthquakeMap = ({
 
         mapInstanceRef.current = map;
 
+        const markers = window.L.markerClusterGroup();
+
         earthquakes.forEach((eq) => {
           const mag = parseFloat(eq.magnitude);
           const lat = parseFloat(eq.latitude);
           const lng = parseFloat(eq.longitude);
-          const depth = parseInt(eq.depth);
-          const cleanLocation = eq.location.replace(/\n\s*/g, ' ').trim();
-
           const color = getMagnitudeColor(mag);
           const size = 20 + mag * 5;
 
@@ -50,49 +51,64 @@ const EarthquakeMap = ({
             className: 'custom-marker',
             html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;">${mag}</div>`,
             iconSize: [size, size],
-            iconAnchor: [size / 2, size / 2]
+            iconAnchor: [size / 2, size / 2],
           });
 
-          const marker = window.L.marker([lat, lng], { icon }).addTo(map);
-
+          const marker = window.L.marker([lat, lng], { icon });
           marker.bindPopup(`
             <div style="font-family: sans-serif;">
               <strong style="font-size: 14px; color: #1f2937;">Magnitude ${mag}</strong><br/>
               <span style="color: #6b7280; font-size: 12px;">${eq.dateTime}</span><br/>
-              <span style="color: #4b5563; font-size: 12px;">${cleanLocation}</span><br/>
-              <span style="color: #6b7280; font-size: 11px;">Depth: ${depth} km</span><br/>
-              ${eq.detailLink ? `<a href="${eq.detailLink}" target="_blank" style="color: #2563eb; font-size: 11px; text-decoration: underline;">View Details</a>` : ''}
+              <span style="color: #4b5563; font-size: 12px;">${eq.location}</span><br/>
+              <span style="color: #6b7280; font-size: 11px;">Depth: ${eq.depth} km</span><br/>
             </div>
           `);
-
-          marker.on('click', () => {
-            setSelectedEarthquake(eq);
-            const eqIndex = earthquakes.indexOf(eq);
-            setExpandedItems(prev => new Set(prev).add(eqIndex));
-          });
+          markers.addLayer(marker);
         });
 
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 100);
+        map.addLayer(markers);
+
+        setTimeout(() => map.invalidateSize(), 100);
       }
     };
 
-    if (!document.querySelector('link[href*="leaflet"]')) {
+    // Step 1: Load Leaflet CSS
+    if (!document.querySelector('link[href*="leaflet.min.css"]')) {
       leafletCss = document.createElement('link');
       leafletCss.rel = 'stylesheet';
       leafletCss.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
       document.head.appendChild(leafletCss);
     }
 
+    // Step 2: Load MarkerCluster CSS
+    if (!document.querySelector('link[href*="MarkerCluster.Default.css"]')) {
+      clusterCss = document.createElement('link');
+      clusterCss.rel = 'stylesheet';
+      clusterCss.href = 'https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css';
+      document.head.appendChild(clusterCss);
+    }
+
+    // Step 3: Load Leaflet JS first, then MarkerCluster JS
+    const loadCluster = () => {
+      if (!window.L.markerClusterGroup) {
+        clusterScript = document.createElement('script');
+        clusterScript.src = 'https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js';
+        clusterScript.async = true;
+        clusterScript.onload = initializeMap;
+        document.body.appendChild(clusterScript);
+      } else {
+        initializeMap();
+      }
+    };
+
     if (!window.L) {
       leafletScript = document.createElement('script');
       leafletScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
       leafletScript.async = true;
-      leafletScript.onload = initializeMap;
+      leafletScript.onload = loadCluster;
       document.body.appendChild(leafletScript);
     } else {
-      initializeMap();
+      loadCluster();
     }
 
     return () => {
@@ -102,6 +118,7 @@ const EarthquakeMap = ({
       }
     };
   }, [isExpanded, earthquakes]);
+
 
   useEffect(() => {
     if (mapInstanceRef.current && isExpanded) {
