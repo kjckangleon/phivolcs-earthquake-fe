@@ -8,7 +8,7 @@ export default function PhivolcsDataFetcher() {
   const [error, setError] = useState(null)
   const [lastUpdated, setLastUpdated] = useState(null)
   const [isCached, setIsCached] = useState(false)
-  const [backendUrl] = useState('http://localhost:3001')
+  const [backendUrl] = useState('https://phivolcs-earthquake-api.onrender.com')
   const [filterMagnitude, setFilterMagnitude] = useState(0)
   const [searchLocation, setSearchLocation] = useState('')
   const [expandedRow, setExpandedRow] = useState(null)
